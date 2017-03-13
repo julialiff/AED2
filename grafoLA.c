@@ -116,7 +116,7 @@ VERTICE* inverterArestas(VERTICE *g){
   VERTICE *novo = (VERTICE*) malloc(sizeof(VERTICE)*(V+1));
   inicializar(novo);
   NO* p = (NO*) malloc(sizeof(NO));
-  for(i = 0;i <= V; i++){
+  for(i = 1;i <= V; i++){
     p = g[i].inicio;
     while(p){
       inserirAresta(novo, p->v, i);
@@ -188,13 +188,55 @@ void exibirMatriz(int m[V+1][V+1]){
   }
 }
 
+void copiarGrafo(VERTICE *g, VERTICE *f){
+  int i;
+  NO* p = (NO*) malloc(sizeof(NO));
+  for(i=1;i<=V;i++){
+    p = g[i].inicio;
+    while(p){
+      NO* novo = (NO*) malloc(sizeof(NO));
+      novo->v = p->v;
+      novo->prox = f[i].inicio;
+      f[i].inicio = novo;
+      p = p->prox;
+    }
+  }
+}
+
 bool compararGrafos(VERTICE *g, int m[V+1][V+1]){
   int i;
   if(ordem(g) != ordemMatriz(m)) return false;
-  for(i=0;i<=V;i++){
+  for(i=1;i<=V;i++){
     NO* p = g[i].inicio;
     while(p){
       if(m[i][p->v] != 1) return false;
+      p = p->prox;
+    }
+  }
+  return true;
+}
+
+bool compararGrafos2(VERTICE *g, VERTICE *f){
+  int i;
+  bool achou = false;
+  if(ordem(g) != ordem(f)) return false;
+  for(i=1;i<=V;i++){
+    NO* p = g[i].inicio;
+    printf("i: %d **********\n", i);
+    while(p){
+      NO* q = f[i].inicio;
+      while(q){
+        printf("p: %d\n", p->v);
+        printf("q: %d\n", q->v);
+        if(p->v == q->v){
+          achou = true;
+          break;
+        }
+        q = q->prox;
+      }
+      printf("\n");
+      if(achou = false) return false;
+      else achou = false;
       p = p->prox;
     }
   }
@@ -219,7 +261,6 @@ int main(){
   m[4][3] = 1;
   m[5][4] = 1;
   m[5][5] = 1;
-  m[1][5] = 1;
 
   exibirMatriz(m);
   printf(" \n\n\n\n");
@@ -228,7 +269,6 @@ int main(){
   VERTICE *g = (VERTICE*) malloc(sizeof(VERTICE)*(V+1));
   inicializar(g);
   inserirAresta(g, 1, 2);
-  inserirAresta(g, 2, 2);
   inserirAresta(g, 3, 5);
   inserirAresta(g, 3, 2);
   inserirAresta(g, 4, 3);
@@ -252,18 +292,30 @@ int main(){
   printf("\nGrau de saída: %d \n ", gs);
   int ge = grauEntrada(g, 2);
   printf("\nGrau de entrada: %d \n ", ge);
-  VERTICE *novo = (VERTICE*) malloc(sizeof(VERTICE)*(V+1));
-  novo = inverterArestas(g);
+  // VERTICE *novo = (VERTICE*) malloc(sizeof(VERTICE)*(V+1));
+  // novo = inverterArestas(g);
+  // exibir(novo);
+
+
   int t = ordem(g);
   int tm = ordemMatriz(m);
   printf("\n Tamanho: %d\n\n", t);
   printf("\n Tamanho matriz: %d\n\n", tm);
-  exibir(novo);
 
   printf("\n\n\n\n\n");
   zerarFlags(g);
   prof(g, 3);
 
+
   bool c = compararGrafos(g, m);
   printf("\n Comparar Grafos: %d\n", c);
+
+
+  VERTICE *f = (VERTICE*) malloc(sizeof(VERTICE)*(V+1));
+  inicializar(f);
+  copiarGrafo(g, f);
+  exibir(f);
+
+  bool c2 = compararGrafos2(g, f);
+  printf("\n Comparar Grafos2: %d\n", c2);
 }
