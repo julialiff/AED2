@@ -110,7 +110,6 @@ int grauEntrada(VERTICE *g, int j){
   return grau;
 }
 
-
 //inverter arestas
 VERTICE* inverterArestas(VERTICE *g){
   int i;
@@ -135,7 +134,6 @@ void zerarFlags(VERTICE *g){
   }
 }
 
-
 //busca em profundidade
 void prof(VERTICE *g, int i){
   g[i].flag = 1;
@@ -150,11 +148,87 @@ void prof(VERTICE *g, int i){
   g[i].flag = 2;
 }
 
+//ordem do grafo
+int ordem(VERTICE *g){
+  int t = 0;
+  int i;
+  NO* p;
+  for(i=1;i<=V;i++){
+    p = g[i].inicio;
+    while(p){
+      t++;
+      p = p->prox;
+    }
+  }
+  return t;
+}
+
+
+int ordemMatriz(int m[V+1][V+1]){
+  int i, j;
+  int t = 0;
+  for(i=1;i<=V;i++){
+    for(j=1;j<=V;j++){
+      if(m[i][j] == 1) t++;
+    }
+  }
+  return t;
+}
+
+void exibirMatriz(int m[V+1][V+1]){
+  int i, j;
+  printf("   1 2 3 4 5\n");
+  printf(" ___________\n");
+  for(i=1;i<=V;i++){
+    printf("%d: ", i);
+    for(j=1;j<=V;j++){
+      printf("%d ", m[i][j]);
+    }
+    printf("\n");
+  }
+}
+
+bool compararGrafos(VERTICE *g, int m[V+1][V+1]){
+  int i;
+  if(ordem(g) != ordemMatriz(m)) return false;
+  for(i=0;i<=V;i++){
+    NO* p = g[i].inicio;
+    while(p){
+      if(m[i][p->v] != 1) return false;
+      p = p->prox;
+    }
+  }
+  return true;
+}
+
 int main(){
-  // NO *ant;
+  //grafo em matriz
+  int m[V+1][V+1];
+
+  //inicializar matriz
+  int i, j;
+  for(i=1; i<=V;i++){
+    for(j=1;j<=V;j++){
+      m[i][j] = 0;
+    }
+  }
+
+  m[1][2] = 1;
+  m[3][5] = 1;
+  m[3][2] = 1;
+  m[4][3] = 1;
+  m[5][4] = 1;
+  m[5][5] = 1;
+  m[1][5] = 1;
+
+  exibirMatriz(m);
+  printf(" \n\n\n\n");
+
+  //grafo em lista de adjacências
   VERTICE *g = (VERTICE*) malloc(sizeof(VERTICE)*(V+1));
   inicializar(g);
   inserirAresta(g, 1, 2);
+  inserirAresta(g, 2, 2);
   inserirAresta(g, 3, 5);
   inserirAresta(g, 3, 2);
   inserirAresta(g, 4, 3);
@@ -180,10 +254,16 @@ int main(){
   printf("\nGrau de entrada: %d \n ", ge);
   VERTICE *novo = (VERTICE*) malloc(sizeof(VERTICE)*(V+1));
   novo = inverterArestas(g);
+  int t = ordem(g);
+  int tm = ordemMatriz(m);
+  printf("\n Tamanho: %d\n\n", t);
+  printf("\n Tamanho matriz: %d\n\n", tm);
   exibir(novo);
 
   printf("\n\n\n\n\n");
   zerarFlags(g);
   prof(g, 3);
-}
 
+  bool c = compararGrafos(g, m);
+  printf("\n Comparar Grafos: %d\n", c);
+}
