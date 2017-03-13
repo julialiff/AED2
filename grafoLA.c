@@ -148,6 +148,19 @@ void prof(VERTICE *g, int i){
   g[i].flag = 2;
 }
 
+
+//fix:
+void profMatriz(int m[V+1][V+1], int i){
+  int j;
+  for(j=1;j<=V;j++){
+    if(m[i][j]==1){
+      profMatriz(m, j);
+      printf("%d \n", j);
+    }
+  }
+  m[i][j] = 2;
+}
+
 //ordem do grafo
 int ordem(VERTICE *g){
   int t = 0;
@@ -318,4 +331,6 @@ int main(){
 
   bool c2 = compararGrafos2(g, f);
   printf("\n Comparar Grafos2: %d\n", c2);
+
+  // profMatriz(m, 3);
 }
