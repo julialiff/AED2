@@ -8,9 +8,11 @@
 
 typedef int bool;
 
+//aresta
 typedef struct aux{
   int v;
   struct aux *prox;
+  bool expressa;
 }NO;
 
 typedef struct s{
@@ -35,12 +37,13 @@ bool arestaExiste(VERTICE *g, int i, int j, NO **ant){
   return false;
 }
 
-void inserirAresta(VERTICE *g, int i, int j){
+void inserirAresta(VERTICE *g, int i, int j, bool express){
   NO** ant = (NO**) malloc(sizeof(NO));
   if(arestaExiste(g, i, j, ant)) return;
   NO* novo = (NO*) malloc(sizeof(NO));
   novo->v = j;
   novo->prox = g[i].inicio;
+  novo->expressa = express;
   g[i].inicio = novo;
 }
 
@@ -119,7 +122,7 @@ VERTICE* inverterArestas(VERTICE *g){
   for(i = 1;i <= V; i++){
     p = g[i].inicio;
     while(p){
-      inserirAresta(novo, p->v, i);
+      inserirAresta(novo, p->v, i, 0);
       p = p->prox;
     }
   }
@@ -150,7 +153,7 @@ void prof(VERTICE *g, int i){
 
 
 //fix:
-void profMatriz(int m[V+1][V+1], int i){
+void profMatriz(bool m[V+1][V+1], int i){
   int j;
   for(j=1;j<=V;j++){
     if(m[i][j]==1){
@@ -177,7 +180,7 @@ int ordem(VERTICE *g){
 }
 
 
-int ordemMatriz(int m[V+1][V+1]){
+int ordemMatriz(bool m[V+1][V+1]){
   int i, j;
   int t = 0;
   for(i=1;i<=V;i++){
@@ -188,7 +191,7 @@ int ordemMatriz(int m[V+1][V+1]){
   return t;
 }
 
-void exibirMatriz(int m[V+1][V+1]){
+void exibirMatriz(bool m[V+1][V+1]){
   int i, j;
   printf("   1 2 3 4 5\n");
   printf(" ___________\n");
@@ -256,9 +259,69 @@ bool compararGrafos2(VERTICE *g, VERTICE *f){
   return true;
 }
 
+//Verificar quais vértices são alcançáveis a partir do início
+void profA(VERTICE *g, int i, NO** concluidos){
+  g[i].flag = 1;
+  NO* p = g[i].inicio;
+  while(p){
+    if(g[p->v].flag == 0) profA(g, p->v, concluidos);
+    p = p->prox;
+  }
+  g[i].flag = 2;
+  NO* novo = (NO*) malloc(sizeof(NO*));
+  novo->v = i;
+  novo->prox = *concluidos;
+  *concluidos = novo;
+}
+
+//em um grafo de trânsito, verificar se há um caminho de i até j usando apenas vias expressas
+
+void profExpress(VERTICE *g, int i, int j, bool *fim){
+  if(!*fim){
+    g[i].flag = 1;
+    NO* p = g[i].inicio;
+    while(p){
+      if(p->v == j){
+        *fim = true;
+        return;
+      }
+      if(g[p->v].flag == 0) profExpress(g, p->v, j, fim);
+      p = p->prox;
+    }
+    g[i].flag = 2;
+  }
+}
+
+void profN(VERTICE *g, int i, int j, bool*fim){
+  g[i].flag = 1;
+  NO* p = g[i].inicio;
+  while(p){
+    if(!p->expressa){
+      p = p->prox;
+      continue;
+    }
+    if(p->v == j){
+      *fim = true;
+      return;
+    }
+    if(g[p->v].flag == 0 && !(*fim)) profN(g, p->v, j, fim);
+  }
+  g[i].flag = 2;
+}
+
+void profMatriz2(bool m[V+1][V+1], int i, int *flag){
+  flag[i] = 1;
+  for(int j=1; j<=V; j++){
+    if(m[i][j] && flag[j]==0){
+      profMatriz2(m, j, flag);
+    }
+  }
+  flag[i] = 2;
+}
+
 int main(){
   //grafo em matriz
-  int m[V+1][V+1];
+  bool m[V+1][V+1];
 
   //inicializar matriz
   int i, j;
@@ -281,12 +344,12 @@ int main(){
   //grafo em lista de adjacências
   VERTICE *g = (VERTICE*) malloc(sizeof(VERTICE)*(V+1));
   inicializar(g);
-  inserirAresta(g, 1, 2);
-  inserirAresta(g, 3, 5);
-  inserirAresta(g, 3, 2);
-  inserirAresta(g, 4, 3);
-  inserirAresta(g, 5, 4);
-  inserirAresta(g, 5, 5);
+  inserirAresta(g, 1, 2, 1);
+  inserirAresta(g, 3, 5, 0);
+  inserirAresta(g, 3, 2, 1);
+  inserirAresta(g, 4, 3, 0);
+  inserirAresta(g, 5, 4, 1);
+  inserirAresta(g, 5, 5, 1);
   exibir(g);
   // excluir(g, 3, 2);
   // excluir(g, 3, 5);
