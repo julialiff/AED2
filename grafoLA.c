@@ -319,6 +319,12 @@ void profMatriz2(bool m[V+1][V+1], int i, int *flag){
   flag[i] = 2;
 }
 
+void largura(VERTICE *g, int i){
+  zerarFlags(g);
+  FILA f;
+  inicializarFila(&f);
+}
+
 int main(){
   //grafo em matriz
   bool m[V+1][V+1];
